@@ -25,26 +25,27 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   }
   console.log('Success! Connected to MongoDB');
   const myDB = db.db('TodoApp');
-  db.close();
+  // db.close();
 
 
-});
+// });
 // DODAWANIE ELEMENTÓW DO MONGODB - Na końcu dodać klamrę i nawias zamykający!
 //
-// myDB.collection('Todos').insertOne({
-//   text: 'Something to do',
-//   completed: false
-//
-// }, (err, result)=>{
-//   if (err){
-//     return console.log('Unable to insert todo!', err);
-//   }
-//   // ops attribute is going to store all of the docs that were inserted in this case
-//   console.log(JSON.stringify(result.ops,undefined,2));
-// });
-//
-//
-// db.close();
+myDB.collection('Todos').insertOne({
+  text: 'Eat dinner',
+  completed: false
+
+}, (err, result)=>{
+  if (err){
+    return console.log('Unable to insert todo!', err);
+  }
+  // ops attribute is going to store all of the docs that were inserted in this case
+  console.log(JSON.stringify(result.ops,undefined,2));
+});
+
+
+db.close();
+});
 
 // myDB.collection('Users').insertOne({
 //   name: 'Marcia',
