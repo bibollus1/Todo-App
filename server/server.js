@@ -26,15 +26,23 @@ app.post('/todos', (req, res) => {
     completed: req.body.completed,
     completedAt: req.body.completedAt
   });
-  todo.save().then((doc)=>{
+  todo.save().then((doc) => {
     res.send(doc);
     console.log("Success!");
-  },(e)=>{
+  }, (e) => {
     res.send(e);
     console.error("Error: ", e);
   });
 });
 
+app.get('/todos', (req, res) => {
+  // return everything
+  Todo.find().then((todos) => {
+    res.send({todos}); // making code more flexible for future
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
 
 app.listen(3000, () => {
   console.log('Started on port 3000!');
