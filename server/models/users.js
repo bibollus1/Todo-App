@@ -24,4 +24,4 @@ var User = mongoose.model('User',{
 //   console.error('Unable to add user!');
 // });
 //
-// module.exports = {User};
+ module.exports = {User};
