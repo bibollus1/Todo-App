@@ -1,7 +1,9 @@
 // libs
 const express = require('express');
 const bodyParser = require('body-parser');
-const{ObjectID} = require('mongodb');
+const {
+  ObjectID
+} = require('mongodb');
 
 // local
 const {
@@ -41,7 +43,9 @@ app.post('/todos', (req, res) => {
 app.get('/todos', (req, res) => {
   // return everything
   Todo.find().then((todos) => {
-    res.send({todos}); // making code more flexible for future
+    res.send({
+      todos
+    }); // making code more flexible for future
   }, (e) => {
     res.status(400).send(e);
   });
@@ -53,25 +57,49 @@ app.get('/todos', (req, res) => {
 // if no todo - 404 with empty body
 // 5. error - send back 400 - send back empty body
 // GET /todos/12345
-app.get('/todos/:id', (req,res) =>{
+app.get('/todos/:id', (req, res) => {
   var id = req.params.id;
   //res.send(req.params);
-  if(!ObjectID.isValid(id)){
+  if (!ObjectID.isValid(id)) {
     console.log('Id not valid');
     res.status(404).send();
   }
-  Todo.findById(id).then((todo)=>{
-    if(!todo){
+  Todo.findById(id).then((todo) => {
+    if (!todo) {
       return res.status(404).send();
 
     }
-    res.send({todo});
+    res.send({
+      todo
+    });
     console.log('Id: ', id);
-  }, (e) =>{
+  }, (e) => {
     res.status(400).send();
     console.error(e)
   });
+});
 
+app.delete('/todos/:id', (req, res)=>{
+  // get the id
+  var id = req.params.id;
+  // validate id - > not valid return 404
+  if (!ObjectID.isValid(id)){
+     return res.status(404).send();
+  }
+  // remove todo by id
+  Todo.findByIdAndRemove(id).then((todo)=>{
+    if (todo === null){
+      console.log("Can't find document!");
+      return res.status(404).send();
+    }
+    return res.status(200).send(todo);
+  }).catch((e)=>{
+    return res.status(404).send();
+  });
+    // success
+      // if no doc 404
+      // if doc, send doc back with 200
+    // error -404
 });
 
 
