@@ -2,9 +2,12 @@
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 const {
   ObjectID
 } = require('mongodb');
+
+
 
 // local
 const {
@@ -130,10 +133,40 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
+////////////////////////////////////////////////////
+////////////////////////////User
+////////////////Authentication
+///////Start
+
+app.post('/users', (req, res)=>{
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body);
+
+  user.save().then((user)=>{
+    return user.generateAuthToken();
+  }).then((token)=>{
+    res.header('x-auth', token).send(user);
+  }).catch((e)=>{
+    res.status(400).send(e);
+    console.log("User with this email already exist!");
+  })
+});
+
+app.get('/users', (req, res) => {
+  // return everything
+  Todo.find().then((users) => {
+    res.send({
+      users
+    }); // making code more flexible for future
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
+
 app.listen(port, () => {
   console.log(`Started on port ${port}! `);
 });
 
 module.exports = {
   app
-}
+};

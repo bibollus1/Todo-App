@@ -1,14 +1,84 @@
+// Schema is an object that defines the structure of any documents that will be stored in your MongoDB collection;
+// it enables you to define types and validators for all of your data items.
+//
+// Model is an object that gives you easy access to a named collection,
+// allowing you to query the collection and use the Schema to validate any documents you save to that collection.
+// It is created by combining a Schema, a Connection, and a collection name.
+
 const mongoose = require('mongoose');
+const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
-var User = mongoose.model('User',{
-  email: {
-    type: String,
-    require: true,
-    trim: true,
-    minlength: 1
+
+var UserSchema = new mongoose.Schema({
+    email: {
+      type: String,
+      require: true,
+      trim: true,
+      minlength: 1,
+      unique: true,
+      validate: {
+        //validator: validator.isEmail,
+        validator: (value) => {
+          return validator.isEmail(value);
+        },
+        message: '{value} is not a valid email.'
+      }
+    },
+    password: {
+      type: String,
+      require: true,
+      minlength: 6
+    },
+    tokens: [{
+      accesss: {
+        type: String,
+        require: true
+      },
+      token: {
+        type: String,
+        require: true
+      },
+    }],
+
+  },
+
+  {
+    usePushEach: true
   }
-});
+);
+// to not give everything back to user - fe in postman to not send password and tokens
+UserSchema.methods.toJSON = function (){
+  var user = this;
+  var userObject = user.toObject();
 
+  return _.pick(userObject,['_id', 'email']);
+};
+
+// dodawanie dowolnych metod
+// arrow function do not bind this keyword!
+UserSchema.methods.generateAuthToken = function() {
+  var user = this;
+  var access = 'auth';
+  var token = jwt.sign({
+    _id: user._id.toHexString(),
+    access
+  }, 'abcd1234').toString();
+  user.tokens.push({
+    access,
+    token
+  });
+  // it returns promise
+  // returning value passed as success argument for next call
+  return user.save().then(() => {
+    return token;
+  });
+};
+
+var User = mongoose.model('User', UserSchema);
+
+// POST /users
 
 // Example of creating new user
 //
@@ -24,4 +94,6 @@ var User = mongoose.model('User',{
 //   console.error('Unable to add user!');
 // });
 //
- module.exports = {User};
+module.exports = {
+  User
+};
