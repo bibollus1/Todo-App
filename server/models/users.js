@@ -32,7 +32,7 @@ var UserSchema = new mongoose.Schema({
       minlength: 6
     },
     tokens: [{
-      accesss: {
+      access: {
         type: String,
         require: true
       },
@@ -69,7 +69,7 @@ UserSchema.methods.generateAuthToken = function () {
 };
 
 UserSchema.statics.findByToken = function (token) {
-  var User = this;
+  var Users = this;
   var decoded;
 
   try {
@@ -79,13 +79,13 @@ UserSchema.statics.findByToken = function (token) {
   }
 
   return User.findOne({
-    '_id': decoded._id,
+    _id: decoded._id,
     'tokens.token': token,
     'tokens.access': 'auth'
   });
 };
 
-var User = mongoose.model('User', UserSchema);
+var User = mongoose.model('Users', UserSchema);
 
 
 
