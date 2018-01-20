@@ -1,19 +1,35 @@
+const bcrypt = require('bcryptjs');
+
+var password = '123abc!';
+
+bcrypt.genSalt(10, (err,salt)=>{
+  bcrypt.hash(password, salt,(err, hash)=>{
+    console.log(hash);
+  });
+});
+
+var hashedPassword = '$2a$10$oNOTirPpxeinc5G7JciHsO7.s4cWyOxq3GnCHBUw3oNLGKIn.sCRS';
+
+bcrypt.compare(password, hashedPassword, (err,res)=>{
+  console.log(res);
+});
+
 // crypto-js
 // w aplikacji - jsonwebtoken
 // jwt.io
 
-const jwt = require('jsonwebtoken');
-
-var data = {
-  id: 5
-};
-
-var token = jwt.sign(data,'123abc');
-console.log(token);
-// jwt.verify
-
-var decoded = jwt.verify(token, '123abc');
-console.log('decoded', decoded);
+// const jwt = require('jsonwebtoken');
+//
+// var data = {
+//   id: 5
+// };
+//
+// var token = jwt.sign(data,'123abc');
+// console.log(token);
+// // jwt.verify
+//
+// var decoded = jwt.verify(token, '123abc');
+// console.log('decoded', decoded);
 
 // Obydwie funkcje poniżej do haszowania, zawarte są w lib jsonwebtoken.
 // const {SHA256} = require('crypto-js');
