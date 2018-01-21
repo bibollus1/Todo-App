@@ -19,7 +19,9 @@ const {
 const {
   User
 } = require('./models/users.js')
-var {authenticate} = require('./middleware/authenticate');
+var {
+  authenticate
+} = require('./middleware/authenticate');
 
 var app = express();
 // bodyparser take json and converts to body object
@@ -123,13 +125,19 @@ app.patch('/todos/:id', (req, res) => {
     body.completedAt = null;
   }
 
-  Todo.findByIdAndUpdate(id, {$set:body}, {new: true}).then((todo)=>{
-    if(!todo){
+  Todo.findByIdAndUpdate(id, {
+    $set: body
+  }, {
+    new: true
+  }).then((todo) => {
+    if (!todo) {
       return res.status(404).send();
     }
     // res.send({todo:todo})
-    res.send({todo})
-  }).catch((e)=>{
+    res.send({
+      todo
+    })
+  }).catch((e) => {
     res.status(404).send();
   })
 });
@@ -156,15 +164,23 @@ app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
 });
 
-app.post('/users/login', (req,res)=>{
+app.post('/users/login', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
 
-  User.findByCredentials(body.email, body.password).then((user) =>{
-    return user.generateAuthToken().then((token)=>{
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);
     });
-  }).catch((e)=>{
+  }).catch((e) => {
     res.status(404).send();
+  });
+});
+
+app.delete('/users/me/token', authenticate, (req, res) => {
+  req.user.removeToken(req.token).then(()=>{
+    res.status(200).send();
+  }, ()=>{
+    res.status(400).send();
   });
 });
 
