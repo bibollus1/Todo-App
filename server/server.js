@@ -32,11 +32,12 @@ app.use(bodyParser.json());
 const port = process.env.PORT || 3000;
 
 // for resource creation
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate,(req, res) => {
   var todo = new Todo({
     text: req.body.text,
-    completed: req.body.completed,
-    completedAt: req.body.completedAt
+    _creator: req.user._id
+    // completed: req.body.completed,
+    // completedAt: req.body.completedAt
   });
   todo.save().then((doc) => {
     res.send(doc);
@@ -47,9 +48,11 @@ app.post('/todos', (req, res) => {
   });
 });
 
-app.get('/todos', (req, res) => {
+app.get('/todos', authenticate,(req, res) => {
   // return everything
-  Todo.find().then((todos) => {
+  Todo.find({
+    _creator: req.user._id
+  }).then((todos) => {
     res.send({
       todos
     }); // making code more flexible for future
@@ -64,14 +67,18 @@ app.get('/todos', (req, res) => {
 // if no todo - 404 with empty body
 // 5. error - send back 400 - send back empty body
 // GET /todos/12345
-app.get('/todos/:id', (req, res) => {
+
+app.get('/todos/:id', authenticate,(req, res) => {
   var id = req.params.id;
   //res.send(req.params);
   if (!ObjectID.isValid(id)) {
     console.log('Id not valid');
     res.status(404).send();
   }
-  Todo.findById(id).then((todo) => {
+  Todo.findOne({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo) => {
     if (!todo) {
       return res.status(404).send();
 
@@ -86,22 +93,28 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
   // get the id
   var id = req.params.id;
   // validate id - > not valid return 404
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
+    console.log('wtf');
   }
   // remove todo by id
-  Todo.findByIdAndRemove(id).then((todo) => {
-    if (todo === null) {
-      console.log("Can't find document!");
-      return res.status(404).send();
+  Todo.findOneAndRemove({
+    _id: id,
+    _creator: req.user._id
+
+  }).then((todo) => {
+    if (!todo) {
+
+      return res.status(404).send();console.log('wtf');
     }
-    return res.status(200).send(todo);
+    return res.status(200).send(todo);console.log('wtf');
   }).catch((e) => {
-    return res.status(404).send();
+    return res.status(404).send();console.log('wtf');
+
   });
   // success
   // if no doc 404
@@ -110,7 +123,7 @@ app.delete('/todos/:id', (req, res) => {
 });
 // LODASH PICK
 
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id',authenticate ,(req, res) => {
   var id = req.params.id;
   var body = _.pick(req.body, ['text', 'completed']);
 
@@ -125,7 +138,10 @@ app.patch('/todos/:id', (req, res) => {
     body.completedAt = null;
   }
 
-  Todo.findByIdAndUpdate(id, {
+  Todo.findOneAndUpdate({
+    _id: id,
+    _creator: req.user._id
+  }, {
     $set: body
   }, {
     new: true
